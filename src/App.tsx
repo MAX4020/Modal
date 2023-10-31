@@ -3,12 +3,6 @@ import { FaCircle } from "react-icons/fa"
 import {column, container} from "./styles/index"
 import {useState} from "react"
 import { ModalConfirm, ModalForm, ModalInfo} from "./moduls/Modal";
-
-  export interface Isync{
-    state: any
-    controlResult: (data:number)=>void
-    hideModalConfirm: ()=>void
-  }
 function App() {
   const [modalInfo, setModalInfo] = useState(false)
   const [modalConfirm, setModalConfirm] = useState(false)
@@ -21,9 +15,17 @@ function App() {
   const hideModalForm = () =>{setModalForm(false)}
   const showModalForm = () =>{setModalForm(true)}
 
-  const parseResult = async ({state, controlResult, hideModalConfirm}:Isync) => {
-    fetch('https://jsonplaceholder.typicode.com/todos').then(response => response.json()).then((json:any[]) => controlResult(json[10].completed ? 0:3))
-    setTimeout(hideModalConfirm,3000)
+  const parseResult = async (controlResult: (data:number)=>void) => {
+    controlResult(2)
+    try{
+      const response = await fetch('https://jsonplaceholder.typicode.com/todos?_delay=3000')
+      const json = await response.json()
+      
+      controlResult(json[10].completed ? 1:3)
+    }
+    catch(e){
+      controlResult(3)
+    }
   }
 
 

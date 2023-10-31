@@ -4,7 +4,6 @@ import { button } from "../styles";
 import {useState} from "react"
 import CircularProgress from '@mui/material/CircularProgress';
 import { ButtonDanger, ButtonSuccess } from "./Button/Button";
-import { Isync } from "../App";
 
 export interface Ioverlay{
   children?: React.ReactNode
@@ -20,7 +19,7 @@ export interface Imodal{
 }
 export interface ImodalConfirm{
   cancle?: () => void
-  apply: (args:Isync)=>void
+  apply: (controlResult: (data:number)=>void)=>void
   title?: string
   control?: boolean
 }
@@ -33,20 +32,28 @@ export interface ImodalForm{
 }
 
 export const Overlay = ({children, close}:Ioverlay) => {
+  const [isHiden, setIsHiden] = useState(false)
+
+  const hideOverlay = () =>{
+    setIsHiden(true)
+  }
+  const showOverlay = () =>{
+    setIsHiden(false)
+  }
 
   return( 
     <>
-      <div onClick={close} className="absolute bg-stone-800/[.50] m-auto h-[100%] w-[100%] top-0 transition-[0.6]">
+      <div onMouseDown={hideOverlay} onMouseUp={showOverlay} style={{opacity:isHiden?0:1}} className="absolute bg-stone-800/[.50] m-auto h-[100%] w-[100%] top-0 transition-[0.6]">
         <div className='flex flex-col items-center justify-center h-[100%] transition-[0.6]'>{children}</div>
-        </div>
+      </div>
     </>
    );
 }
 
-export const ModalInfo = ({children, close, title, view}:Imodal)=>{
+export const ModalInfo = ({children, close, title}:Imodal)=>{
   return createPortal(
-    <Overlay close={close} view={view}>
-      <div onClick={(e)=>e.stopPropagation()} className="bg-stone-300 w-[800px] border-2 border-black">
+    <Overlay close={close}>
+      <div onMouseDown={(e)=>e.stopPropagation()} onClick={(e)=>e.stopPropagation()} className="bg-stone-300 w-[800px] border-2 border-black">
       <div className="flex bg-stone-300 w-[100%] justify-between border-b-2 border-black p-[5px]"><header>{title}</header><button onClick={close}><AiOutlineCloseCircle className="bg-stone-300 w-[25px] h-[25px] hover:fill-red-600 transition"/></button></div> 
       <div className="p-[10px] overflow-y-scroll h-[400px] flex justify-center flex-col">{children}</div>
       </div>
@@ -58,7 +65,7 @@ export const ModalConfirm = ({cancle, apply, title, control = false}:ImodalConfi
   const [result, setResult] = useState(0)
 
   const applyHandler = () => {
-    apply({hideModalConfirm,true,control?setResult:1})
+    apply(setResult)
   }
 
   return createPortal(
